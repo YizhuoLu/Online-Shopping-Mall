@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.hzyc.backMall.dao.GoodsMapper">
+		<insert id="addNewType" parameterType="String">
+			insert into goods_type values (null, #{type})
+		</insert>
+		<select id="selGTp" resultType="GoodsType">
+			select * from goods_type 
+		</select>
+		<select id="isWhom" parameterType="person" resultType="String">
+			select identity from person where username = #{username} and password = #{password}
+		</select>
+		<select id="selTypeById" parameterType="String" resultType="GoodsType">
+			select * from goods_type where id = #{id}
+		</select>
+		<update id="updTypeById" parameterType="GoodsType">
+			update goods_type set type = #{type} where id = #{id}
+		</update>
+		<delete id="delTypeById" parameterType="String">
+			delete from goods_type where id = #{id}
+		</delete>
+		<insert id="addGoods" parameterType="goods">
+			insert into goods values(null, #{title},#{typeId},#{brand},#{price},#{discount},#{imgname},#{status},#{description},#{number})
+		</insert>
+		<resultMap type="goodsType" id="selGoodsType">
+			<id column="id" property="id"/>
+			<result column="type" property="type"/>
+			<collection property="goodsTypeList" ofType="goods">
+				<id column="id" property="id"/>
+				<result column="title" property="title"/>
+				<result column="typeId" property="typeId"/>
+				<result column="brand" property="brand"/>
+				<result column="price" property="price"/>
+				<result column="discount" property="discount"/>
+				<result column="imgname" property="imgname"/>
+				<result column="status" property="status"/>
+				<result column="description" property="description"/>
+				<result column="number" property="number"/>
+			</collection>
+		</resultMap>
+		<select id="selGoods" resultMap="selGoodsType">
+			select goods_type.type, goods.*
+			from goods, goods_type
+			where goods.typeId = goods_type.id 
+		</select>
+		<update id="updDelGoods" parameterType="String">
+			update goods set status = '已停销' where id = #{id}
+		</update>
+		<resultMap type="goods" id="selGBI">
+			<id column="id" property="id"/>
+			<result column="title" property="title"/>
+			<result column="typeId" property="typeId"/>
+			<result column="brand" property="brand"/>
+			<result column="price" property="price"/>
+			<result column="discount" property="discount"/>
+			<result column="imgname" property="imgname"/>
+			<result column="status" property="status"/>
+			<result column="description" property="description"/>
+			<result column="number" property="number"/>
+			<association property="goodsType" javaType="GoodsType">
+				<id column="id" property="id"/>
+				<result column="type" property="type"/>
+			</association>
+		</resultMap>
+		<select id="selGoodsById" parameterType="String" resultMap="selGBI">
+			select goods_type.type, goods.*
+			from goods, goods_type
+			where goods.typeId = goods_type.id
+			and goods.id = #{id}
+		</select>
+		<update id="updGoodsById" parameterType="goods">
+			update goods set title=#{title}, typeId=#{typeId}, 
+			brand = #{brand}, price=#{price}, 
+			discount=#{discount}, imgname=#{imgname}, status=#{status},
+			description=#{description}, number=#{number}
+			where id=#{id}		
+		</update>
+		<resultMap type="goods" id="selGI">
+			<id column="id" property="id"/>
+			<result column="title" property="title"/>
+			<result column="typeId" property="typeId"/>
+			<result column="brand" property="brand"/>
+			<result column="price" property="price"/>
+			<result column="discount" property="discount"/>
+			<result column="imgname" property="imgname"/>
+			<result column="status" property="status"/>
+			<result column="description" property="description"/>
+			<result column="number" property="number"/>
+			<association property="goodsType" javaType="GoodsType">
+				<id column="id" property="id"/>
+				<result column="type" property="type"/>
+			</association>
+		</resultMap>
+		<select id="cSelGoods" parameterType="String" resultMap="selGI">
+			select goods_type.type, goods.*
+			from goods, goods_type
+			where goods.title like '%${value}%' 
+			and goods.status ='有货'
+			and goods_type.id = goods.typeId
+		</select>
+		<insert id="addUser" parameterType="person">
+			insert into person values (null, #{username}, #{password}, #{email}, '会员')
+		</insert>
+		<select id="judgeUser" parameterType="person" resultType="person">
+			select * from person where username=#{username} 
+			and password = #{password} 
+		</select>
+		<select id="gDetail" parameterType="String" resultType="goods">
+			select * from goods where id = #{id}
+		</select>
+		<insert id="addCart" parameterType="cart">
+			insert into cart values (null, #{userId}, #{goodsId}, #{number}, #{money})
+		</insert>
+		<resultMap type="person" id="selThree">
+			<id column="id" property="id"/>
+			<result column="username" property="username"/>
+			<result column="password" property="password"/>
+			<result column="email" property="email"/>
+			<result column="identity" property="identity"/>
+			<collection property="cartList" ofType="cart">
+				<id column="id" property="id"/>
+				<result column="userId" property="userId"/>
+				<result column="goodsId" property="goodsId"/>
+				<result column="number" property="number"/>
+				<result column="money" property="money"/>
+				<collection property="goodsList" ofType="goods">
+					<id column="id" property="id"/>
+					<result column="title" property="title"/>
+					<result column="typeId" property="typeId"/>
+					<result column="brand" property="brand"/>
+					<result column="price" property="price"/>
+					<result column="discount" property="discount"/>
+					<result column="imgname" property="imgname"/>
+					<result column="status" property="status"/>
+					<result column="description" property="description"/>
+					<result column="number" property="number"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="selCart" parameterType="String" resultMap="selThree">
+			SELECT cart.id, cart.money, goods.title, 
+			goods.imgname, goods.price, cart.number 
+			FROM cart, goods, person 
+			WHERE person.id=cart.userId 
+			AND goods.id=cart.goodsId 
+			and person.id=${value}
+		</select>
+		<delete id="delCartById" parameterType="String">
+			delete from cart where id = #{id}
+		</delete>
+		<select id="selCartById" parameterType="String" resultType="cart">
+			select * from cart where id = #{id}
+		</select>
+		<insert id="addOrderFromCart" parameterType="orders">
+			INSERT INTO `lyz`.`orders`(`id`,`userId`,`goodsId`,`number`,`money`,`createTime`,`address`,`phone`,`status`) values (null, #{userId}, #{goodsId}, #{number}, #{money}, #{createTime}, #{address}, #{phone}, '未支付')
+		</insert>
+		<update id="updGoodsNum" parameterType="goods">
+			update goods set number = #{number} where id = #{id}
+		</update>
+		<select id="selGById0" parameterType="String" resultType="String">
+			select goods.number from goods where id = #{id}
+		</select>
+		<resultMap type="person" id="selOrder">
+			<id column="id" property="id"/>
+			<result column="username" property="username"/>
+			<result column="password" property="password"/>
+			<result column="email" property="email"/>
+			<result column="identity" property="identity"/>
+			<collection property="ordersList" ofType="orders">
+				<id column="id" property="id"/>
+				<result column="userId" property="userId"/>
+				<result column="goodsId" property="goodsId"/>
+				<result column="number" property="number"/>
+				<result column="money" property="money"/>
+				<result column="createTime" property="createTime"/>
+				<result column="address" property="address"/>
+				<result column="phone" property="phone"/>
+				<result column="status" property="status"/>
+				<collection property="goodsList" ofType="goods">
+					<id column="id" property="id"/>
+					<result column="title" property="title"/>
+					<result column="typeId" property="typeId"/>
+					<result column="brand" property="brand"/>
+					<result column="price" property="price"/>
+					<result column="discount" property="discount"/>
+					<result column="imgname" property="imgname"/>
+					<result column="status" property="status"/>
+					<result column="description" property="description"/>
+					<result column="number" property="number"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="showOrder" parameterType="String" resultMap="selOrder">
+			select goods.title, goods.imgname, 
+			goods.price,orders.*
+			FROM orders, goods, person 
+			WHERE person.id=orders.userId 
+			AND goods.id=orders.goodsId 
+			and person.id=${value}
+			and orders.status ='未支付'
+		</select>
+		<update id="updSta" parameterType="String">
+			update orders set status = '发货' where id = #{id}
+		</update>
+		<resultMap type="person" id="selOrders">
+			<id column="id" property="id"/>
+			<result column="username" property="username"/>
+			<result column="password" property="password"/>
+			<result column="email" property="email"/>
+			<result column="identity" property="identity"/>
+			<collection property="ordersList" ofType="orders">
+				<id column="id" property="id"/>
+				<result column="userId" property="userId"/>
+				<result column="goodsId" property="goodsId"/>
+				<result column="number" property="number"/>
+				<result column="money" property="money"/>
+				<result column="createTime" property="createTime"/>
+				<result column="address" property="address"/>
+				<result column="phone" property="phone"/>
+				<result column="status" property="status"/>
+				<collection property="goodsList" ofType="goods">
+					<id column="id" property="id"/>
+					<result column="title" property="title"/>
+					<result column="typeId" property="typeId"/>
+					<result column="brand" property="brand"/>
+					<result column="price" property="price"/>
+					<result column="discount" property="discount"/>
+					<result column="imgname" property="imgname"/>
+					<result column="status" property="status"/>
+					<result column="description" property="description"/>
+					<result column="number" property="number"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="orderHis" parameterType="String" resultMap="selOrders">
+			select goods.title, goods.imgname, 
+			goods.price,orders.*
+			FROM orders, goods, person 
+			WHERE person.id=orders.userId 
+			AND goods.id=orders.goodsId 
+			and person.id=${value}
+			and orders.status='已收货'
+		</select>
+		<insert id="addcomment" parameterType="commentary">
+			insert into commentary values(null, #{userId}, #{goodsId}, #{comment})
+		</insert>
+		<resultMap type="person" id="showPl">
+			<id column="id" property="id"/>
+			<result column="username" property="username"/>
+			<result column="password" property="password"/>
+			<result column="email" property="email"/>
+			<result column="identity" property="identity"/>
+			<collection property="commentList" ofType="commentary">
+				<id column="id" property="id"/>
+				<result column="userId" property="userId"/>
+				<result column="goodsId" property="goodsId"/>
+				<result column="comment" property="comment"/>
+				<collection property="goodsList" ofType="goods">
+					<id column="id" property="id"/>
+					<result column="title" property="title"/>
+					<result column="typeId" property="typeId"/>
+					<result column="brand" property="brand"/>
+					<result column="price" property="price"/>
+					<result column="discount" property="discount"/>
+					<result column="imgname" property="imgname"/>
+					<result column="status" property="status"/>
+					<result column="description" property="description"/>
+					<result column="number" property="number"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="selPl" parameterType="String" resultMap="showPl">
+			SELECT person.username, commentary.comment 
+			FROM person, commentary, goods 
+			WHERE goods.id = commentary.goodsId
+			AND goods.id = #{id}
+			AND commentary.userId = person.id
+		</select>
+		<resultMap type="person" id="selWOrders">
+			<id column="id" property="id"/>
+			<result column="username" property="username"/>
+			<result column="password" property="password"/>
+			<result column="email" property="email"/>
+			<result column="identity" property="identity"/>
+			<collection property="ordersList" ofType="orders">
+				<id column="id" property="id"/>
+				<result column="userId" property="userId"/>
+				<result column="goodsId" property="goodsId"/>
+				<result column="number" property="number"/>
+				<result column="money" property="money"/>
+				<result column="createTime" property="createTime"/>
+				<result column="address" property="address"/>
+				<result column="phone" property="phone"/>
+				<result column="status" property="status"/>
+				<collection property="goodsList" ofType="goods">
+					<id column="id" property="id"/>
+					<result column="title" property="title"/>
+					<result column="typeId" property="typeId"/>
+					<result column="brand" property="brand"/>
+					<result column="price" property="price"/>
+					<result column="discount" property="discount"/>
+					<result column="imgname" property="imgname"/>
+					<result column="status" property="status"/>
+					<result column="description" property="description"/>
+					<result column="number" property="number"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="waitG" parameterType="String" resultMap="selWOrders">
+			select goods.title, goods.imgname, 
+			goods.price,orders.*
+			FROM orders, goods, person 
+			WHERE person.id=orders.userId 
+			AND goods.id=orders.goodsId 
+			and person.id=${value}
+			and orders.status='发货'
+		</select>
+		<update id="updSta1" parameterType="String">
+			update orders set status = '已收货' where id = #{id}
+		</update>
+		<resultMap type="orders" id="orAgod"><!-- 
+			<id column="id" property="id"/>
+			<result column="userId" property="userId"/>
+			<result column="goodsId" property="goodsId"/>
+			<result column="number" property="number"/>
+			<result column="money" property="money"/>
+			<result column="createTime" property="createTime"/>
+			<result column="address" property="address"/>
+			<result column="phone" property="phone"/>
+			<result column="status" property="status"/> -->
+			<collection property="goodsList" ofType="goods">
+				<result column="title" property="title"/>
+				<result column="imgname" property="imgname"/>
+				<result column="price" property="price"/>
+				<result column="brand" property="brand"/>
+				<result column="total" property="total"/>
+			</collection>
+		</resultMap>
+		<select id="staNum" parameterType="staTime" resultMap="orAgod">
+			SELECT SUM(a.number) total,a.title title, a.imgname imgname, a.price price, a.brand brand FROM 
+			( SELECT goods.title, goods.imgname, 
+			goods.price,goods.brand, orders.number 
+			FROM goods, orders 
+			WHERE goods.id=orders.goodsId 
+			AND DATE(orders.createTime) BETWEEN #{time} AND #{time1}  ) a
+			GROUP BY a.title
+		</select>
+		<resultMap type="orders" id="orAgod1">
+			<!-- <id column="id" property="id"/>
+			<result column="userId" property="userId"/>
+			<result column="goodsId" property="goodsId"/>
+			<result column="number" property="number"/>
+			<result column="money" property="money"/>
+			<result column="createTime" property="createTime"/>
+			<result column="address" property="address"/>
+			<result column="phone" property="phone"/>
+			<result column="status" property="status"/> -->
+			<collection property="goodsList" ofType="goods">
+				<result column="title" property="title"/>
+				<result column="imgname" property="imgname"/>
+				<result column="price" property="price"/>
+				<result column="brand" property="brand"/>
+				<result column="discount" property="discount"/>
+				<result column="total" property="total"/>
+			</collection>
+		</resultMap>
+		<select id="staSum" parameterType="staTime" resultMap="orAgod1">
+			SELECT SUM(a.money) total,a.title, a.imgname, a.discount, a.price, a.brand FROM 
+			( SELECT goods.title, goods.imgname, 
+			goods.price,goods.brand, orders.money, goods.discount
+			FROM goods, orders 
+			WHERE goods.id=orders.goodsId 
+			AND DATE(orders.createTime)  BETWEEN #{time} AND #{time1} ) a
+			GROUP BY a.title
+		</select>
+		<!-- 后台查看购物车 -->
+		<resultMap type="person" id="selThree2">
+			<result column="username" property="username"/>
+			<collection property="cartList" ofType="cart">
+				<result column="number" property="number"/>
+				<result column="money" property="money"/>
+				<collection property="goodsList" ofType="goods">
+					<result column="title" property="title"/>
+					<result column="imgname" property="imgname"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="seeCart" resultMap="selThree2">
+			SELECT person.username, goods.title, 
+			goods.imgname, cart.number, cart.money
+			FROM person, cart, goods 
+			WHERE cart.userId=person.id 
+			AND cart.goodsId=goods.id
+		</select>
+		<!-- 后台查询订单 -->
+		<resultMap type="person" id="selWOrders2">
+			<result column="username" property="username"/>
+			<collection property="ordersList" ofType="orders">
+				<result column="number" property="number"/>
+				<result column="money" property="money"/>
+				<result column="createTime" property="createTime"/>
+				<result column="address" property="address"/>
+				<result column="phone" property="phone"/>
+				<result column="status" property="status"/>
+				<collection property="goodsList" ofType="goods">
+					<result column="title" property="title"/>
+					<result column="imgname" property="imgname"/>
+				</collection>
+			</collection>
+		</resultMap>
+		<select id="seeOrder" resultMap="selWOrders2">
+			SELECT person.username, goods.title, goods.imgname,
+			orders.number, orders.money, orders.createTime, 
+			orders.address, orders.phone, orders.status
+			FROM person, orders, goods
+			WHERE person.id=orders.userId
+			AND goods.id=orders.goodsId
+		</select>
+		<!-- 查询广告图片放list里传至主页 -->
+		<select id="selAd" resultType="String">
+			SELECT imgTitle FROM advertisement WHERE STATUS = '1'
+		</select>
+		<!-- 查询状态为1的广告id -->
+		<select id="selAdSta" resultType="String">
+			SELECT id FROM advertisement WHERE STATUS = '1'
+		</select>
+		<!-- 修改广告状态为0 -->
+		<update id="chaAdSta0" parameterType="String">
+			UPDATE advertisement SET advertisement.status = '0' WHERE id = #{id}
+		</update>
+		<!-- 修改广告状态为1 -->
+		<update id="chaAdSta1" parameterType="String">
+			UPDATE advertisement SET advertisement.status = '1' WHERE id = #{id}
+		</update>
+		<!-- 后台用户信息查询显示 -->
+		<select id="selUser" resultType="Person">
+			SELECT username, PASSWORD, 
+			email, identity 
+			FROM person 
+			WHERE identity = '会员'
+		</select>
+	</mapper>

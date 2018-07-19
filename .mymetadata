@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="backMall"
+  id="myeclipse.1510201945416"
+  context-root="/backMall"
+  j2ee-spec="5.0"
+  archive="backMall.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
